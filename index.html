@@ -5,62 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Portal</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: #0f0f0f;
-            color: #ffffff;
+            color: white;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background: #1a1a1a;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 10px;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #00aaff;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .nav-btn {
+            padding: 12px;
+            background: #2c2c2c;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: #444;
+        }
+
+        /* Content Area */
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .placeholder {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            height: 100%;
+            color: #777;
         }
-        .container {
-            text-align: center;
-            background: #1a1a1a;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid #333;
-        }
-        h1 {
-            margin-bottom: 1.5rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-        .link-box {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .btn {
-            text-decoration: none;
-            color: white;
-            background: #2c2c2c;
-            padding: 15px 30px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            border: 1px solid transparent;
-        }
-        .btn:hover {
-            background: #3d3d3d;
-            border-color: #555;
-            transform: translateY(-2px);
-        }
-        .btn-yt { border-left: 4px solid #ff0000; }
-        .btn-proxy { border-left: 4px solid #00aaff; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>ACCESS PANEL</h1>
-        <div class="link-box">
-            <a href="https://www.unblockyoutube.co/" class="btn btn-yt" target="_blank">YouTube Unblocked</a>
-            <a href="https://www.croxyproxy.com/social" class="btn btn-proxy" target="_blank">CroxyProxy Social</a>
-        </div>
+    <div class="sidebar">
+        <h2>DASHBOARD</h2>
+        <button class="nav-btn" onclick="loadSite('https://www.unblockyoutube.co/')">YouTube Unblock</button>
+        <button class="nav-btn" onclick="loadSite('https://www.croxyproxy.com/social')">CroxyProxy Social</button>
+        <button class="nav-btn" style="margin-top: auto; background: #333;" onclick="location.reload()">Refresh App</button>
     </div>
+
+    <div class="content">
+        <iframe id="main-frame" name="view" src="about:blank"></iframe>
+    </div>
+
+    <script>
+        function loadSite(url) {
+            document.getElementById('main-frame').src = url;
+        }
+        
+        // Load the first site by default
+        window.onload = function() {
+            loadSite('https://www.unblockyoutube.co/');
+        };
+    </script>
 
 </body>
 </html>
