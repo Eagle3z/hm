@@ -3,101 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Portal</title>
+    <title>Admin Control Center & Proxy</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        :root {
+            --bg-color: #0f172a;
+            --panel-color: #1e293b;
+            --accent-color: #3b82f6;
+            --text-color: #f8fafc;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+        }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #0f0f0f;
-            color: white;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Sidebar Navigation */
-        .sidebar {
-            width: 250px;
-            background: #1a1a1a;
-            border-right: 1px solid #333;
+        /* Sidebar Styling */
+        #sidebar {
+            width: 320px;
+            background-color: var(--panel-color);
+            border-right: 1px solid #334155;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            gap: 10px;
+            padding: 15px;
+            box-sizing: border-box;
         }
 
-        .sidebar h2 {
-            font-size: 1.2rem;
+        .section {
             margin-bottom: 20px;
-            color: #00aaff;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .nav-btn {
+            background: #111827;
             padding: 12px;
-            background: #2c2c2c;
-            color: white;
-            text-decoration: none;
             border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            transition: 0.3s;
+            border: 1px solid #1e293b;
+        }
+
+        h3 {
+            margin-top: 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+        }
+
+        /* VPN Toggle Switch */
+        .switch-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #475569; transition: .3s; border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+            background-color: white; transition: .3s; border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--success-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Inputs & Buttons */
+        input[type="text"], url-input {
+            width: 100%;
+            padding: 8px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: 0.2s;
         }
 
-        .nav-btn:hover {
-            background: #444;
+        .btn-primary { background-color: var(--accent-color); }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-success { background-color: var(--success-color); }
+        button:hover { filter: brightness(1.2); }
+
+        /* Command Line Terminal */
+        #terminal {
+            background: #000;
+            font-family: 'Courier New', Courier, monospace;
+            height: 120px;
+            overflow-y: auto;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #38bdf8;
+            margin-bottom: 5px;
         }
 
-        /* Content Area */
-        .content {
+        /* Main Web Viewer Window */
+        #main-content {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
+        #browser-bar {
+            background: var(--panel-color);
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #334155;
         }
 
-        .placeholder {
+        #web-frame {
+            flex-grow: 1;
+            border: none;
+            background: #fff;
+        }
+
+        .user-row {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            height: 100%;
-            color: #777;
+            font-size: 12px;
+            padding: 4px 0;
+            border-bottom: 1px solid #1e293b;
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>DASHBOARD</h2>
-        <button class="nav-btn" onclick="loadSite('https://www.unblockyoutube.co/')">YouTube Unblock</button>
-        <button class="nav-btn" onclick="loadSite('https://www.croxyproxy.com/social')">CroxyProxy Social</button>
-        <button class="nav-btn" style="margin-top: auto; background: #333;" onclick="location.reload()">Refresh App</button>
+    <!-- SIDEBAR CONTROLS -->
+    <div id="sidebar">
+        <h2>Admin Panel</h2>
+        
+        <!-- Auto VPN -->
+        <div class="section">
+            <div class="switch-container">
+                <span><strong>Auto VPN Proxy</strong></span>
+                <label class="switch">
+                    <input type="checkbox" id="vpnToggle" onchange="toggleVpn()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <p style="font-size: 11px; color: #94a3b8; margin: 5px 0 0 0;" id="vpnStatus">Status: Disconnected</p>
+        </div>
+
+        <!-- User Management (Kick / Ban by Permanent ID) -->
+        <div class="section">
+            <h3>User Enforcement</h3>
+            <input type="text" id="targetId" placeholder="Enter Target HWID / UUID">
+            <div style="display: flex; gap: 5px;">
+                <button class="btn-danger" onclick="executeAction('kick')">Kick</button>
+                <button class="btn-danger" style="background:#b91c1c;" onclick="executeAction('ban')">Ban</button>
+                <button class="btn-success" onclick="executeAction('unban')">Unban</button>
+            </div>
+            
+            <div style="margin-top: 10px; max-height: 100px; overflow-y: auto;" id="activeUsers">
+                <span style="font-size: 11px; color: #94a3b8;">Active Session IDs:</span>
+                <!-- Dynamic user rows will appear here -->
+            </div>
+        </div>
+
+        <!-- Owner Command Line (CMD) -->
+        <div class="section" style="flex-grow: 1; display: flex; flex-direction: column;">
+            <h3>Owner Console (CMD)</h3>
+            <div id="terminal">System initialized. Awaiting commands...</div>
+            <input type="text" id="cmdInput" placeholder="Enter command (e.g., /clear, /status)..." onkeydown="handleCmd(event)">
+        </div>
     </div>
 
-    <div class="content">
-        <iframe id="main-frame" name="view" src="about:blank"></iframe>
+    <!-- MAIN WEB VIEWER -->
+    <div id="main-content">
+        <div id="browser-bar">
+            <input type="text" id="urlInput" value="https://www.wikipedia.org" style="margin: 0; flex-grow: 1;">
+            <button class="btn-primary" style="width: auto; padding: 0 20px;" onclick="navigateWeb()">Go</button>
+        </div>
+        <!-- Note: Many modern websites block loading inside iframes via X-Frame-Options headers -->
+        <iframe id="web-frame" src="https://www.wikipedia.org"></iframe>
     </div>
 
     <script>
-        function loadSite(url) {
-            document.getElementById('main-frame').src = url;
-        }
-        
-        // Load the first site by default
-        window.onload = function() {
-            loadSite('https://www.unblockyoutube.co/');
-        };
-    </script>
+        // Simulated Database for permanent IDs and status
+        let bannedIds = new Set();
+        let activeSessions = [
+            { id: "HWID-8821-X9A2", ip: "192.168.1.45" },
+            { id: "HWID-4301-B7F9", ip: "172.56.21.9" }
+        ];
 
+        // Initialize active users list
+        function renderUsers() {
+            const container = document.getElementById('activeUsers');
+            container.innerHTML = '<span style="font-size: 11px; color: #94a3b8;">Active Session IDs:</span>';
+            activeSessions.forEach(user => {
+                container.innerHTML += `
+                    <div class="user-row">
+                        <span>${user.id}</span>
+                        <span style="color:#94a3b8">${bannedIds.has(user.id) ? '[BANNED]' : '[Online]'}</span>
+                    </div>`;
+            });
+        }
+        renderUsers();
+
+        // Web Navigation Function
+        function navigateWeb() {
+            let url = document.getElementById('urlInput').value;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            logTerminal(`Navigating to: ${url}`);
+            
+            // If VPN is checked, route traffic through a web-proxy tool line (Conceptual)
+            if(document.getElementById('vpnToggle').checked) {
+                logTerminal(`[VPN] Routing traffic securely...`);
+                // Real-world implementation requires pointing to a proxy server wrapper
+                document.getElementById('web-frame').src = url; 
+            } else {
+                document.getElementById('web-frame').src = url;
+            }
+        }
+
+        // Auto VPN Toggle
+        function toggleVpn() {
+            const isChecked = document.getElementById('vpnToggle').checked;
+            const statusText = document.getElementById('vpnStatus');
+            if(isChecked) {
+                statusText.innerText = "Status: Connected (Routing encrypted)";
+                statusText.style.color = "var(--success-color)";
+                logTerminal("[VPN] Virtual Private Network activated automatically.");
+            } else {
+                statusText.innerText = "Status: Disconnected";
+                statusText.style.color = "#94a3b8";
+                logTerminal("[VPN] VPN deactivated.");
+            }
+        }
+
+        // Kick / Ban / Unban Processing
+        function executeAction(action) {
+            const id = document.getElementById('targetId').value.trim();
+            if(!id) { alert("Please provide a valid ID"); return; }
+
+            if(action === 'ban') {
+                bannedIds.add(id);
+                logTerminal(`[SECURITY] ID ${id} has been permanently banned.`);
+            } else if (action === 'kick') {
+                logTerminal(`[SECURITY] ID ${id} dropped from current session.`);
+            } else if (action === 'unban') {
+                bannedIds.delete(id);
+                logTerminal(`[SECURITY] ID ${id} has been unbanned.`);
+            }
+            renderUsers();
+        }
+
+        // Terminal Log Utility
+        function logTerminal(message) {
+            const term = document.getElementById('terminal');
+            term.innerHTML += `<br>> ${message}`;
+            term.scrollTop = term.scrollHeight;
+        }
+
+        // Owner CMD parsing
+        function handleCmd(e) {
+            if(e.key === 'Enter') {
+                const inputElement = document.getElementById('cmdInput');
+                const cmd = inputElement.value.trim();
+                if(!cmd) return;
+
+                logTerminal(`<span style="color: #fff;">root# ${cmd}</span>`);
+                
+                // Parse Custom System Commands
+                if(cmd === '/clear') {
+                    document.getElementById('terminal').innerHTML = "Logs cleared.";
+                } else if(cmd.startsWith('/ban ')) {
+                    const id = cmd.replace('/ban ', '');
+                    bannedIds.add(id);
+                    logTerminal(`Banned ID: ${id}`);
+                } else if (cmd === '/status') {
+                    logTerminal(`Banned database count: ${bannedIds.size}. VPN state: ${document.getElementById('vpnToggle').checked}`);
+                } else {
+                    logTerminal(`Command not recognized. Try: /status, /clear, /ban [id]`);
+                }
+                
+                inputElement.value = '';
+                renderUsers();
+            }
+        }
+    </script>
 </body>
 </html>
