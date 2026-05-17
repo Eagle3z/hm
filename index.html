@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workspace Dashboard</title>
+    <title>Workspace Dashboard Engine</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -24,7 +24,7 @@
             overflow: hidden;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar Layout */
         #sidebar {
             width: 320px;
             background-color: var(--panel-color);
@@ -51,7 +51,6 @@
             color: #9ca3af;
         }
 
-        /* Toggle Switches */
         .switch-wrapper {
             display: flex;
             justify-content: space-between;
@@ -80,7 +79,6 @@
         input:checked + .slider { background-color: var(--success-color); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Form Inputs & Controls */
         input[type="text"] {
             width: 100%;
             padding: 8px 12px;
@@ -113,7 +111,6 @@
         .btn-green { background-color: var(--success-color); }
         button:hover { filter: brightness(1.15); }
 
-        /* Terminal Console */
         #cmd-terminal {
             background: #000;
             font-family: monospace;
@@ -127,7 +124,7 @@
             border: 1px solid #111827;
         }
 
-        /* Web Frame Area */
+        /* Web Viewport Frame */
         #viewport {
             flex-grow: 1;
             display: flex;
@@ -157,30 +154,23 @@
             border-bottom: 1px solid #374151;
         }
     </style>
-
-    <!-- Optional deployment scripts for local proxies like Ultraviolet -->
-    <script src="/uv/uv.bundle.js" defer></script>
-    <script src="/uv/uv.config.js" defer></script>
 </head>
 <body>
 
-    <!-- CONTROL PANEL SIDEBAR -->
     <div id="sidebar">
         <h2 style="margin-top:0; font-size: 20px;">Network Admin</h2>
         
-        <!-- Network Routing Options -->
         <div class="panel-box">
             <div class="switch-wrapper">
                 <span><strong>Stealth Proxy VPN</strong></span>
                 <label class="toggle-switch">
-                    <input type="checkbox" id="vpnMode" onchange="updateProxyMode()">
+                    <input type="checkbox" id="vpnMode" checked onchange="updateProxyMode()">
                     <span class="slider"></span>
                 </label>
             </div>
-            <p id="proxyStatus" style="font-size: 11px; color: #9ca3af; margin: 6px 0 0 0;">Traffic Status: Direct (Unencrypted)</p>
+            <p id="proxyStatus" style="font-size: 11px; color: var(--success-color); margin: 6px 0 0 0;">Traffic Status: Connected via Proxy Tunnel</p>
         </div>
 
-        <!-- Quick Launch Apps -->
         <div class="panel-box">
             <h3>Quick Launch</h3>
             <div class="btn-group" style="margin-bottom: 5px;">
@@ -193,7 +183,6 @@
             </div>
         </div>
 
-        <!-- ID Bans (Fingerprint Engine) -->
         <div class="panel-box">
             <h3>User ID Management</h3>
             <input type="text" id="targetHardwareId" placeholder="Target Permanent ID...">
@@ -204,58 +193,55 @@
             </div>
             
             <div style="margin-top: 12px; max-height: 90px; overflow-y: auto;" id="sessionDisplay">
-                <!-- User IDs stay fixed even if they clear cookies -->
-            </div>
+                </div>
         </div>
 
-        <!-- Owner CMD Line Terminal -->
         <div class="panel-box" style="flex-grow: 1; display: flex; flex-direction: column; margin-bottom: 0;">
             <h3>Owner Console (CMD)</h3>
-            <div id="cmd-terminal">Terminal ready. Core active.</div>
-            <input type="text" id="terminalInput" placeholder="Enter custom command..." onkeydown="processCommand(event)">
+            <div id="cmd-terminal">Terminal initialized. Proxy pipeline active.</div>
+            <input type="text" id="terminalInput" placeholder="Enter dashboard command..." onkeydown="processCommand(event)">
         </div>
     </div>
 
-    <!-- WEB DISPLAY CORE -->
     <div id="viewport">
         <div id="address-bar">
-            <input type="text" id="targetUrl" value="https://www.wikipedia.org" style="margin: 0; flex-grow: 1;">
+            <input type="text" id="targetUrl" value="https://www.youtube.com" style="margin: 0; flex-grow: 1;">
             <button class="btn-blue" style="width: auto; padding: 0 22px;" onclick="loadRequestedUrl()">Launch</button>
         </div>
-        <iframe id="app-frame" src="https://www.wikipedia.org"></iframe>
+        <iframe id="app-frame" src=""></iframe>
     </div>
 
     <script>
-        // Local state management 
         let systemBanDatabase = new Set();
         let connectedDevices = [
             { id: "DEV-F39A-8102-XX", status: "Active" },
             { id: "DEV-7A11-4992-BC", status: "Active" }
         ];
 
-        // Unique Hardware Identifier Generator (Does not change on cache clear)
+        // Hardware tracking engine (Creates custom IDs that ignore cookie wipes)
         function generatePermanentID() {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (!gl) return "DEV-STATIC-USER-ID";
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "";
-            // Quick hash of hardware specs
-            let hash = 0;
-            const hardwareString = renderer + screen.colorDepth + navigator.hardwareConcurrency;
-            for (let i = 0; i < hardwareString.length; i++) {
-                hash = (hash << 5) - hash + hardwareString.charCodeAt(i);
-                hash |= 0;
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) return "DEV-GENERIC-USER";
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "";
+                let hash = 0;
+                const hardwareString = renderer + screen.colorDepth + navigator.hardwareConcurrency;
+                for (let i = 0; i < hardwareString.length; i++) {
+                    hash = (hash << 5) - hash + hardwareString.charCodeAt(i);
+                    hash |= 0;
+                }
+                return "DEV-" + Math.abs(hash).toString(16).toUpperCase();
+            } catch(e) {
+                return "DEV-BKP-74823";
             }
-            return "DEV-" + Math.abs(hash).toString(16).toUpperCase();
         }
 
-        // Add user profile to current session view
         function refreshUserPanel() {
             const display = document.getElementById('sessionDisplay');
             display.innerHTML = '<span style="font-size: 11px; color: #9ca3af;">Network Hardware Fingerprints:</span>';
             
-            // Display your own fixed ID
             const myID = generatePermanentID();
             display.innerHTML += `
                 <div class="user-list-item" style="color: #60a5fa;">
@@ -272,11 +258,13 @@
                     </div>`;
             });
         }
-        refreshUserPanel();
 
-        // Engine Routing Logic
+        // REVERSE PROXY CORE ENGINE - Routes requests through web proxy pipelines
         function loadRequestedUrl() {
             let destination = document.getElementById('targetUrl').value.trim();
+            if (!destination) return;
+
+            // Clean up the URL format
             if (!destination.startsWith('http://') && !destination.startsWith('https://')) {
                 destination = 'https://' + destination;
             }
@@ -285,18 +273,15 @@
             const frame = document.getElementById('app-frame');
 
             if (proxyActive) {
-                printLog(`[STEALTH] Encrypting and bypassing restrictions for: ${destination}`);
+                printLog(`[PROXY T_ENGINE] Injecting request scripts for: ${destination}`);
                 
-                // If you are using an active Ultraviolet or public mirror backend:
-                if (typeof __uv$config !== 'undefined') {
-                    frame.src = __uv$config.prefix + __uv$config.encodeUrl(destination);
-                } else {
-                    // Fallback to a functional open public proxy gateway web resolver
-                    frame.src = "https://www.google.com/search?q=" + encodeURIComponent(destination) + "&igu=1";
-                    printLog("[WARN] Running via Google Sandbox fallback proxy mirror.");
-                }
+                // Uses a public, distributed Womginx node web-proxy pipeline
+                // This strips 'X-Frame-Options' directly and serves the site fully working
+                let encodedTarget = encodeURIComponent(destination);
+                frame.src = "https://womginx.arph.org/main/" + destination;
+                
             } else {
-                printLog(`[DIRECT] Attempting straight load connection to: ${destination}`);
+                printLog(`[DIRECT] Bypassing secure tunnel for: ${destination}`);
                 frame.src = destination;
             }
         }
@@ -312,7 +297,7 @@
             if (enabled) {
                 txt.innerText = "Traffic Status: Connected via Proxy Tunnel";
                 txt.style.color = "var(--success-color)";
-                printLog("[VPN] Proxy bypass engine switched ON.");
+                printLog("[VPN] Reverse Proxy pipeline turned ON.");
             } else {
                 txt.innerText = "Traffic Status: Direct (Unencrypted)";
                 txt.style.color = "#9ca3af";
@@ -320,7 +305,6 @@
             }
         }
 
-        // Kick / Ban Management Actions
         function modifyUser(action) {
             const target = document.getElementById('targetHardwareId').value.trim();
             if (!target) { alert("Input an ID string first."); return; }
@@ -329,10 +313,10 @@
                 systemBanDatabase.add(target);
                 printLog(`[SECURITY] Permanently banned ID: ${target}`);
             } else if (action === 'kick') {
-                printLog(`[SECURITY] Terminated real-time session for ID: ${target}`);
+                printLog(`[SECURITY] Terminated viewer context for ID: ${target}`);
             } else if (action === 'unban') {
                 systemBanDatabase.delete(target);
-                printLog(`[SECURITY] Removed ban restriction from ID: ${target}`);
+                printLog(`[SECURITY] Ban dropped from ID: ${target}`);
             }
             refreshUserPanel();
         }
@@ -343,7 +327,7 @@
             term.scrollTop = term.scrollHeight;
         }
 
-        // Owner Terminal System Controls
+        // Terminal Owner Console Scripting
         function processCommand(event) {
             if (event.key === 'Enter') {
                 const element = document.getElementById('terminalInput');
@@ -351,7 +335,6 @@
                 if (!rawCmd) return;
 
                 printLog(`<span style="color:#fff;">owner$ ${rawCmd}</span>`);
-                
                 const tokens = rawCmd.split(' ');
                 const command = tokens[0];
 
@@ -365,28 +348,36 @@
                     case '/ban':
                         if (tokens[1]) {
                             systemBanDatabase.add(tokens[1]);
-                            printLog(`Banned system profile: ${tokens[1]}`);
+                            printLog(`Banned user code: ${tokens[1]}`);
                         } else {
-                            printLog("Error: Missing target component. Use: /ban [ID]");
+                            printLog("Error: Provide target hardware id string.");
                         }
                         break;
                     case '/unban':
                         if (tokens[1]) {
                             systemBanDatabase.delete(tokens[1]);
-                            printLog(`Restored system profile: ${tokens[1]}`);
+                            printLog(`Restored hardware authorization: ${tokens[1]}`);
                         }
                         break;
-                    case '/info':
-                        printLog(`Active Blocks: ${systemBanDatabase.size} | Tunnel: ${document.getElementById('vpnMode').checked}`);
+                    case '/launch':
+                        if (tokens[1]) {
+                            document.getElementById('targetUrl').value = tokens[1];
+                            loadRequestedUrl();
+                        }
                         break;
                     default:
-                        printLog(`Unknown execution script. Tools available: /vpn, /info, /clear, /ban [id], /unban [id]`);
+                        printLog(`Invalid operator console entry. Use /launch [url], /ban [id], /unban [id], or /clear.`);
                 }
-
                 element.value = '';
                 refreshUserPanel();
             }
         }
+
+        // Trigger startup launch load 
+        window.onload = function() {
+            refreshUserPanel();
+            loadRequestedUrl();
+        };
     </script>
 </body>
 </html>
