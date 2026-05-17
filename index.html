@@ -25,7 +25,7 @@
             overflow: hidden;
         }
 
-        /* Sidebar Control Center Layout */
+        /* Sidebar Layout */
         #sidebar {
             width: 320px;
             background-color: var(--panel-color);
@@ -53,7 +53,35 @@
             color: #9ca3af;
         }
 
-        /* Forms, Buttons & Inputs */
+        /* Toggle Switch Styling */
+        .switch-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #4b5563; transition: .2s; border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 4px; bottom: 4px;
+            background-color: white; transition: .2s; border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--success-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
         input[type="text"], input[type="password"] {
             width: 100%;
             padding: 8px 12px;
@@ -102,7 +130,7 @@
             border: 1px solid #111827;
         }
 
-        /* Viewport Panels */
+        /* Main Viewport Panels */
         #viewport {
             flex-grow: 1;
             display: flex;
@@ -143,10 +171,9 @@
             align-items: center;
         }
 
-        /* Hidden Admin Tools Style */
-        .admin-only-section {
-            display: none;
-        }
+        /* Permission Classes */
+        .admin-section { display: none; }
+        .owner-section { display: none; }
     </style>
 </head>
 <body>
@@ -156,8 +183,19 @@
         
         <div class="panel-box" id="loginBox">
             <h3>System Verification</h3>
-            <input type="password" id="adminKeyInput" placeholder="Enter Access Key (admin1)...">
-            <button class="btn-green" onclick="verifyAdminAccess()">Login Admin</button>
+            <input type="password" id="adminKeyInput" placeholder="Enter Key (Ow1 or Ad1)...">
+            <button class="btn-green" onclick="verifyAccess()">Verify Identity</button>
+        </div>
+
+        <div class="panel-box">
+            <div class="switch-wrapper">
+                <span><strong>Bypass VPN Tunnel</strong></span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="vpnMode" checked onchange="updateProxyMode()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <p id="proxyStatus" style="font-size: 11px; color: var(--success-color); margin: 6px 0 0 0;">Status: VPN Routing Active</p>
         </div>
 
         <div class="panel-box">
@@ -185,9 +223,9 @@
                 </div>
         </div>
 
-        <div class="panel-box admin-only-section">
-            <h3>User Enforcement (Fixed ID)</h3>
-            <input type="text" id="targetHardwareId" placeholder="Select or type Target HWID...">
+        <div class="panel-box admin-section owner-section">
+            <h3>User Enforcement (Short ID)</h3>
+            <input type="text" id="targetHardwareId" placeholder="Click user or enter short ID...">
             <div class="btn-group" style="margin-bottom: 0;">
                 <button class="btn-red" onclick="modifyUser('kick')">Kick</button>
                 <button class="btn-red" style="background:#991b1b;" onclick="modifyUser('ban')">Ban</button>
@@ -195,10 +233,10 @@
             </div>
         </div>
 
-        <div class="panel-box admin-only-section" style="flex-grow: 1; display: flex; flex-direction: column; margin-bottom: 0;">
+        <div class="panel-box owner-section" style="flex-grow: 1; display: flex; flex-direction: column; margin-bottom: 0;">
             <h3>Owner Console (CMD)</h3>
-            <div id="cmd-terminal">Terminal secure. Dynamic pipelines functional.</div>
-            <input type="text" id="terminalInput" placeholder="Enter command..." onkeydown="processCommand(event)">
+            <div id="cmd-terminal">Terminal secure. Owner privileges logged.</div>
+            <input type="text" id="terminalInput" placeholder="Enter owner command..." onkeydown="processCommand(event)">
         </div>
     </div>
 
@@ -214,113 +252,98 @@
 
     <script>
         let systemBanDatabase = new Set();
-        let isAdminAuthenticated = false;
+        let userRole = "Guest"; // Can be Guest, Admin, or Owner
+        let currentUserId = "3"; // Your ID default string
 
-        // Realistic Network Stream List Database (Users change dynamically to simulate live system)
+        // Simplified short user connection pool arrays
         let liveConnectedUsers = [
-            { id: "HWID-A482-9901-XX", status: "Active" },
-            { id: "HWID-8F12-4043-BC", status: "Active" },
-            { id: "HWID-391B-7411-FA", status: "Active" }
+            { id: "1", role: "User", status: "Online" },
+            { id: "2", role: "User", status: "Online" }
         ];
 
-        // Unique Hardware Key Identifier Generator
-        function generatePermanentID() {
-            try {
-                const canvas = document.createElement('canvas');
-                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (!gl) return "HWID-LOCAL-USER";
-                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "";
-                let hash = 0;
-                const hardwareString = renderer + screen.colorDepth + navigator.hardwareConcurrency;
-                for (let i = 0; i < hardwareString.length; i++) {
-                    hash = (hash << 5) - hash + hardwareString.charCodeAt(i);
-                    hash |= 0;
-                }
-                return "HWID-" + Math.abs(hash).toString(16).toUpperCase().substring(0, 14);
-            } catch(e) {
-                return "HWID-FAILSAFE";
-            }
-        }
-
-        // Real-Time Login Validation Check
-        function verifyAdminAccess() {
-            const password = document.getElementById('adminKeyInput').value;
+        // Process Identity Checks and update live list displays
+        function verifyAccess() {
+            const key = document.getElementById('adminKeyInput').value.trim();
             const loginBox = document.getElementById('loginBox');
-            const adminElements = document.querySelectorAll('.admin-only-section');
+            const adminBoxes = document.querySelectorAll('.admin-section');
+            const ownerBoxes = document.querySelectorAll('.owner-section');
 
-            if (password === 'admin1') {
-                isAdminAuthenticated = true;
-                loginBox.innerHTML = `<p style="color: var(--success-color); font-weight: bold; margin: 0; font-size:13px;">✓ Authenticated Administrator</p>`;
+            if (key === 'Ow1') {
+                userRole = "Owner";
+                currentUserId = "Owner";
+                loginBox.innerHTML = `<p style="color: #38bdf8; font-weight: bold; margin: 0; font-size:13px;">⚡ Identity Verified: System Owner</p>`;
                 
-                // Unveil hidden panels instantly
-                adminElements.forEach(element => {
-                    element.style.display = "block";
-                    if (element.style.flexDirection === "") {
-                        element.style.display = "flex";
-                    }
+                // Show everything
+                adminBoxes.forEach(el => el.style.display = "block");
+                ownerBoxes.forEach(el => {
+                    el.style.display = "flex";
+                    if(!el.classList.contains('owner-section')) el.style.display = "block";
                 });
+                printLog("[SYSTEM] Owner mode activated. All pipelines open.");
+            } 
+            else if (key === 'Ad1') {
+                userRole = "Admin";
+                currentUserId = "Admin";
+                loginBox.innerHTML = `<p style="color: var(--success-color); font-weight: bold; margin: 0; font-size:13px;">✓ Identity Verified: Network Admin</p>`;
                 
-                printLog("[SYSTEM] Operator parameters accepted. Admin unlocked.");
-                refreshUserPanel();
-            } else {
-                alert("Access Denied: Invalid Security Token.");
+                // Show only user enforcement panels, leave terminal hidden
+                adminBoxes.forEach(el => {
+                    if(!el.classList.contains('owner-section')) el.style.display = "block";
+                });
+            } 
+            else {
+                alert("Authorization token invalid.");
+                return;
             }
+            refreshUserPanel();
         }
 
-        // Live Dynamic Population Control Logic
         function refreshUserPanel() {
             const display = document.getElementById('sessionDisplay');
             display.innerHTML = '';
             
-            const myID = generatePermanentID();
-            const myBanStatus = systemBanDatabase.has(myID);
-
-            // Print yourself
+            // Render your profile tracking block with identity markers
+            const isSelfBanned = systemBanDatabase.has(currentUserId);
             display.innerHTML += `
-                <div class="user-list-item" style="color: #60a5fa; cursor: pointer;" onclick="selectUser('${myID}')">
-                    <span>${myID} (You)</span>
-                    <span style="font-weight:bold;">${myBanStatus ? '[BANNED]' : '[Admin]'}</span>
+                <div class="user-list-item" style="color: #60a5fa; font-weight: bold; cursor: pointer;" onclick="selectUser('${currentUserId}')">
+                    <span>User ${currentUserId} (You)</span>
+                    <span>${isSelfBanned ? '[BANNED]' : '[' + userRole + ']'}</span>
                 </div>`;
 
-            // Print dynamic live users array
+            // Populate other shortened network entities 
             liveConnectedUsers.forEach(user => {
                 const isBanned = systemBanDatabase.has(user.id);
                 display.innerHTML += `
                     <div class="user-list-item" style="cursor: pointer;" onclick="selectUser('${user.id}')">
-                        <span>${user.id}</span>
+                        <span>User ${user.id}</span>
                         <span style="color: ${isBanned ? 'var(--danger-color)' : 'var(--success-color)'}; font-weight: 500;">
-                            ${isBanned ? '[BANNED]' : '[Online]'}
+                            ${isBanned ? '[BANNED]' : '[' + user.status + ']'}
                         </span>
                     </div>`;
             });
         }
 
         function selectUser(id) {
-            if (isAdminAuthenticated) {
+            if (userRole === "Admin" || userRole === "Owner") {
                 document.getElementById('targetHardwareId').value = id;
             }
         }
 
-        // Simulated Network Stream Loop (Makes users join or leave every 15 seconds so it looks completely live)
+        // Simulates realistic continuous online list updates
         setInterval(() => {
-            if (Math.random() > 0.6 && liveConnectedUsers.length < 5) {
-                // Generate a random string simulation user ID
-                let randID = "HWID-" + Math.floor(1000 + Math.random() * 9000) + "-BC" + Math.floor(10 + Math.random() * 89);
-                liveConnectedUsers.push({ id: randID, status: "Active" });
-                if (isAdminAuthenticated) printLog(`[NETWORK] User stream connection established: ${randID}`);
-            } else if (liveConnectedUsers.length > 2) {
-                let dropped = liveConnectedUsers.shift();
-                if (isAdminAuthenticated) printLog(`[NETWORK] Connection terminated: ${dropped.id}`);
+            if (Math.random() > 0.7 && liveConnectedUsers.length < 6) {
+                let nextId = String(liveConnectedUsers.length + 4);
+                liveConnectedUsers.push({ id: nextId, role: "User", status: "Online" });
+                if (userRole === "Owner") printLog(`[NETWORK] Stream channel allocated for User ${nextId}`);
             }
             refreshUserPanel();
-        }, 15000);
+        }, 12000);
 
-        // Core App Window Handling
+        // Core Layout Routing Functionality
         function launchYouTubeEmbed() {
             hideExternalFrame(false);
             document.getElementById('app-frame').src = "https://www.youtube.com/embed/jfKfPfyJRdk?list=PLrEnWoR7Gyh6rU6aP6SPrI0Y69KId_0p_";
-            if (isAdminAuthenticated) printLog("[STREAM] Initialized secure media streaming channel.");
+            if (userRole === "Owner") printLog("[STREAM] Secure media player frameset initialized.");
         }
 
         function hideExternalFrame(shouldHideLocal) {
@@ -356,8 +379,15 @@
             if (!destination.startsWith('http://') && !destination.startsWith('https://')) {
                 destination = 'https://' + destination;
             }
-            // Standard client-side routing fallback setup
-            document.getElementById('app-frame').src = "https://womginx.arph.org/main/" + destination;
+            const proxyActive = document.getElementById('vpnMode').checked;
+            const frame = document.getElementById('app-frame');
+
+            if (proxyActive) {
+                if(userRole === "Owner") printLog(`[STEALTH] Tunneling request parameter payload: ${destination}`);
+                frame.src = "https://womginx.arph.org/main/" + destination;
+            } else {
+                frame.src = destination;
+            }
         }
 
         function fastLaunch(siteUrl) {
@@ -365,22 +395,35 @@
             loadRequestedUrl();
         }
 
-        // Administrative Kick/Ban Executions
+        function updateProxyMode() {
+            const enabled = document.getElementById('vpnMode').checked;
+            const txt = document.getElementById('proxyStatus');
+            if (enabled) {
+                txt.innerText = "Status: VPN Routing Active";
+                txt.style.color = "var(--success-color)";
+                if(userRole === "Owner") printLog("[VPN] Proxy sandbox layers re-initialized.");
+            } else {
+                txt.innerText = "Status: Direct Tunnel Only";
+                txt.style.color = "#9ca3af";
+                if(userRole === "Owner") printLog("[VPN] Proxy pipeline dropped back to raw context.");
+            }
+        }
+
+        // Administrative Kick/Ban Processing
         function modifyUser(action) {
-            if (!isAdminAuthenticated) return;
+            if (userRole === "Guest") return;
             const target = document.getElementById('targetHardwareId').value.trim();
-            if (!target) { alert("Select a user connection profile from the list."); return; }
+            if (!target) { alert("Select an active connection target index."); return; }
 
             if (action === 'ban') {
                 systemBanDatabase.add(target);
-                printLog(`[SECURITY] ID ${target} permanently flagged and dropped.`);
+                if(userRole === "Owner") printLog(`[SECURITY] ID code '${target}' permanently locked out.`);
             } else if (action === 'kick') {
-                printLog(`[SECURITY] Severed live frame socket for signature: ${target}`);
-                // Remove from live display temporary array simulation
+                if(userRole === "Owner") printLog(`[SECURITY] Active browser pool connection dropped for ID: ${target}`);
                 liveConnectedUsers = liveConnectedUsers.filter(u => u.id !== target);
             } else if (action === 'unban') {
                 systemBanDatabase.delete(target);
-                printLog(`[SECURITY] Re-authorized hardware execution for: ${target}`);
+                if(userRole === "Owner") printLog(`[SECURITY] Enforcement dropped from ID string: ${target}`);
             }
             refreshUserPanel();
         }
@@ -394,7 +437,7 @@
         }
 
         function processCommand(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && userRole === "Owner") {
                 const element = document.getElementById('terminalInput');
                 const rawCmd = element.value.trim();
                 if (!rawCmd) return;
@@ -410,17 +453,17 @@
                     case '/ban':
                         if (tokens[1]) {
                             systemBanDatabase.add(tokens[1]);
-                            printLog(`Banned entry ID: ${tokens[1]}`);
+                            printLog(`Banned User ID: ${tokens[1]}`);
                         }
                         break;
                     case '/unban':
                         if (tokens[1]) {
                             systemBanDatabase.delete(tokens[1]);
-                            printLog(`Restored entry ID: ${tokens[1]}`);
+                            printLog(`Restored User ID: ${tokens[1]}`);
                         }
                         break;
                     default:
-                        printLog(`Command invalid. System commands: /ban [id], /unban [id], /clear`);
+                        printLog(`Command error. Controls: /ban [id], /unban [id], /clear`);
                 }
                 element.value = '';
                 refreshUserPanel();
