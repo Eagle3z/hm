@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workspace Dashboard Engine</title>
+    <title>Enterprise Network Core</title>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -12,6 +12,7 @@
             --text-color: #f3f4f6;
             --danger-color: #ef4444;
             --success-color: #10b981;
+            --game-color: #f59e0b;
         }
 
         body {
@@ -24,7 +25,7 @@
             overflow: hidden;
         }
 
-        /* Sidebar Layout */
+        /* Sidebar Dashboard Element */
         #sidebar {
             width: 320px;
             background-color: var(--panel-color);
@@ -33,19 +34,20 @@
             flex-direction: column;
             padding: 15px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .panel-box {
             background: #1f2937;
             padding: 12px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border: 1px solid #374151;
         }
 
         h3 {
             margin-top: 0;
-            font-size: 13px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #9ca3af;
@@ -93,6 +95,7 @@
         .btn-group {
             display: flex;
             gap: 6px;
+            margin-bottom: 6px;
         }
 
         button {
@@ -103,28 +106,30 @@
             cursor: pointer;
             font-weight: 600;
             color: white;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
+        button:active { transform: scale(0.98); }
 
         .btn-blue { background-color: var(--accent-color); }
         .btn-red { background-color: var(--danger-color); }
         .btn-green { background-color: var(--success-color); }
+        .btn-orange { background-color: var(--game-color); }
         button:hover { filter: brightness(1.15); }
 
         #cmd-terminal {
             background: #000;
             font-family: monospace;
-            height: 140px;
+            height: 110px;
             overflow-y: auto;
             padding: 8px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             color: #34d399;
             margin-bottom: 6px;
             border: 1px solid #111827;
         }
 
-        /* Web Viewport Frame */
+        /* Web Viewport View */
         #viewport {
             flex-grow: 1;
             display: flex;
@@ -150,7 +155,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            padding: 5px 0;
+            padding: 4px 0;
             border-bottom: 1px solid #374151;
         }
     </style>
@@ -158,48 +163,58 @@
 <body>
 
     <div id="sidebar">
-        <h2 style="margin-top:0; font-size: 20px;">Network Admin</h2>
+        <h2 style="margin-top:0; font-size: 18px; letter-spacing: 0.5px;">Network Admin</h2>
         
         <div class="panel-box">
             <div class="switch-wrapper">
-                <span><strong>Stealth Proxy VPN</strong></span>
+                <span><strong>Stealth Tunnel VPN</strong></span>
                 <label class="toggle-switch">
                     <input type="checkbox" id="vpnMode" checked onchange="updateProxyMode()">
                     <span class="slider"></span>
                 </label>
             </div>
-            <p id="proxyStatus" style="font-size: 11px; color: var(--success-color); margin: 6px 0 0 0;">Traffic Status: Connected via Proxy Tunnel</p>
+            <p id="proxyStatus" style="font-size: 11px; color: var(--success-color); margin: 6px 0 0 0;">Traffic Status: Connected via Sandbox Proxy</p>
         </div>
 
         <div class="panel-box">
-            <h3>Quick Launch</h3>
-            <div class="btn-group" style="margin-bottom: 5px;">
-                <button class="btn-blue" onclick="fastLaunch('https://www.youtube.com')">YouTube</button>
+            <h3>App Quick Launch</h3>
+            <div class="btn-group">
+                <button class="btn-blue" style="background: #ef4444;" onclick="launchYouTube()">YouTube Fix</button>
                 <button class="btn-blue" onclick="fastLaunch('https://www.google.com')">Google</button>
             </div>
-            <div class="btn-group">
+            <div class="btn-group" style="margin-bottom: 0;">
                 <button class="btn-blue" style="background:#5865F2;" onclick="fastLaunch('https://discord.com')">Discord</button>
-                <button class="btn-blue" style="background:#1cbd53;" onclick="fastLaunch('https://open.spotify.com')">Spotify</button>
+                <button class="btn-blue" style="background:#1f2937;" onclick="fastLaunch('https://wikipedia.org')">Wiki</button>
             </div>
         </div>
 
         <div class="panel-box">
-            <h3>User ID Management</h3>
-            <input type="text" id="targetHardwareId" placeholder="Target Permanent ID...">
+            <h3>Arcade Deck (Unblocked Games)</h3>
             <div class="btn-group">
+                <button class="btn-orange" onclick="fastLaunch('https://play2048.co/')">2048 Retro</button>
+                <button class="btn-orange" onclick="fastLaunch('https://tetris.com/play-tetris')">Classic Tetris</button>
+            </div>
+            <div class="btn-group" style="margin-bottom: 0;">
+                <button class="btn-orange" style="background: #047857;" onclick="fastLaunch('https://web-dashers.github.io')">Geo Dash</button>
+                <button class="btn-orange" style="background: #4338ca;" onclick="fastLaunch('https://classic.minecraft.net')">Minecraft Web</button>
+            </div>
+        </div>
+
+        <div class="panel-box">
+            <h3>User Enforcement (Fixed ID)</h3>
+            <input type="text" id="targetHardwareId" placeholder="Target HWID Profile...">
+            <div class="btn-group" style="margin-bottom: 0;">
                 <button class="btn-red" onclick="modifyUser('kick')">Kick</button>
                 <button class="btn-red" style="background:#991b1b;" onclick="modifyUser('ban')">Ban</button>
                 <button class="btn-green" onclick="modifyUser('unban')">Unban</button>
             </div>
-            
-            <div style="margin-top: 12px; max-height: 90px; overflow-y: auto;" id="sessionDisplay">
-                </div>
+            <div style="margin-top: 10px; max-height: 80px; overflow-y: auto;" id="sessionDisplay"></div>
         </div>
 
         <div class="panel-box" style="flex-grow: 1; display: flex; flex-direction: column; margin-bottom: 0;">
             <h3>Owner Console (CMD)</h3>
-            <div id="cmd-terminal">Terminal initialized. Proxy pipeline active.</div>
-            <input type="text" id="terminalInput" placeholder="Enter dashboard command..." onkeydown="processCommand(event)">
+            <div id="cmd-terminal">Terminal configuration stable. Stream pipes aligned.</div>
+            <input type="text" id="terminalInput" placeholder="Enter administrative script..." onkeydown="processCommand(event)">
         </div>
     </div>
 
@@ -214,16 +229,16 @@
     <script>
         let systemBanDatabase = new Set();
         let connectedDevices = [
-            { id: "DEV-F39A-8102-XX", status: "Active" },
-            { id: "DEV-7A11-4992-BC", status: "Active" }
+            { id: "DEV-M410-9921-AZ", status: "Active" },
+            { id: "DEV-2B88-1043-FF", status: "Active" }
         ];
 
-        // Hardware tracking engine (Creates custom IDs that ignore cookie wipes)
+        // Hardware identification calculation (Stays persistent even when browser storage clears)
         function generatePermanentID() {
             try {
                 const canvas = document.createElement('canvas');
                 const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (!gl) return "DEV-GENERIC-USER";
+                if (!gl) return "DEV-GENERIC-CLIENT";
                 const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
                 const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "";
                 let hash = 0;
@@ -234,13 +249,13 @@
                 }
                 return "DEV-" + Math.abs(hash).toString(16).toUpperCase();
             } catch(e) {
-                return "DEV-BKP-74823";
+                return "DEV-FAILSAFE-NODE";
             }
         }
 
         function refreshUserPanel() {
             const display = document.getElementById('sessionDisplay');
-            display.innerHTML = '<span style="font-size: 11px; color: #9ca3af;">Network Hardware Fingerprints:</span>';
+            display.innerHTML = '<span style="font-size: 11px; color: #9ca3af;">Network Hardware Signatures:</span>';
             
             const myID = generatePermanentID();
             display.innerHTML += `
@@ -259,12 +274,26 @@
             });
         }
 
-        // REVERSE PROXY CORE ENGINE - Routes requests through web proxy pipelines
+        // Invidious API Pipeline Router to fix frame blocking on YouTube
+        function launchYouTube() {
+            document.getElementById('targetUrl').value = "https://www.youtube.com";
+            printLog("[STREAM] Launching YouTube proxy video pipeline...");
+            
+            // Routes via an open Invidious mirror instance. This extracts pure YouTube assets
+            // and streams videos instantly, ignoring school network flags or frame drops.
+            document.getElementById('app-frame').src = "https://yewtu.be";
+        }
+
+        // Standard Navigation Core Engine
         function loadRequestedUrl() {
             let destination = document.getElementById('targetUrl').value.trim();
             if (!destination) return;
 
-            // Clean up the URL format
+            if (destination.includes("youtube.com")) {
+                launchYouTube();
+                return;
+            }
+
             if (!destination.startsWith('http://') && !destination.startsWith('https://')) {
                 destination = 'https://' + destination;
             }
@@ -273,15 +302,11 @@
             const frame = document.getElementById('app-frame');
 
             if (proxyActive) {
-                printLog(`[PROXY T_ENGINE] Injecting request scripts for: ${destination}`);
-                
-                // Uses a public, distributed Womginx node web-proxy pipeline
-                // This strips 'X-Frame-Options' directly and serves the site fully working
-                let encodedTarget = encodeURIComponent(destination);
+                printLog(`[STEALTH] Wrapping frameset layers for: ${destination}`);
+                // Client-side open proxy encapsulation framework
                 frame.src = "https://womginx.arph.org/main/" + destination;
-                
             } else {
-                printLog(`[DIRECT] Bypassing secure tunnel for: ${destination}`);
+                printLog(`[DIRECT] Attempting unprotected connection pipeline: ${destination}`);
                 frame.src = destination;
             }
         }
@@ -295,39 +320,39 @@
             const enabled = document.getElementById('vpnMode').checked;
             const txt = document.getElementById('proxyStatus');
             if (enabled) {
-                txt.innerText = "Traffic Status: Connected via Proxy Tunnel";
+                txt.innerText = "Traffic Status: Connected via Sandbox Proxy";
                 txt.style.color = "var(--success-color)";
-                printLog("[VPN] Reverse Proxy pipeline turned ON.");
+                printLog("[VPN] Dynamic routing layer active.");
             } else {
                 txt.innerText = "Traffic Status: Direct (Unencrypted)";
                 txt.style.color = "#9ca3af";
-                printLog("[VPN] Proxy engine deactivated.");
+                printLog("[VPN] Bypassing dynamic routing layer.");
             }
         }
 
         function modifyUser(action) {
             const target = document.getElementById('targetHardwareId').value.trim();
-            if (!target) { alert("Input an ID string first."); return; }
+            if (!target) { alert("Enter a Target hardware trace ID."); return; }
 
             if (action === 'ban') {
                 systemBanDatabase.add(target);
-                printLog(`[SECURITY] Permanently banned ID: ${target}`);
+                printLog(`[SECURITY] ID ${target} isolated and permanently banned.`);
             } else if (action === 'kick') {
-                printLog(`[SECURITY] Terminated viewer context for ID: ${target}`);
+                printLog(`[SECURITY] Active socket session severed for: ${target}`);
             } else if (action === 'unban') {
                 systemBanDatabase.delete(target);
-                printLog(`[SECURITY] Ban dropped from ID: ${target}`);
+                printLog(`[SECURITY] Enforcement rules removed for: ${target}`);
             }
             refreshUserPanel();
         }
 
         function printLog(text) {
             const term = document.getElementById('cmd-terminal');
-            term.innerHTML += `<br># ${text}`;
+            term.innerHTML += `<br>> ${text}`;
             term.scrollTop = term.scrollHeight;
         }
 
-        // Terminal Owner Console Scripting
+        // Administrative Command Executions
         function processCommand(event) {
             if (event.key === 'Enter') {
                 const element = document.getElementById('terminalInput');
@@ -340,7 +365,7 @@
 
                 switch(command) {
                     case '/clear':
-                        document.getElementById('cmd-terminal').innerHTML = "Console cleared.";
+                        document.getElementById('cmd-terminal').innerHTML = "Console log buffer wiped.";
                         break;
                     case '/vpn':
                         document.getElementById('vpnMode').click();
@@ -348,35 +373,31 @@
                     case '/ban':
                         if (tokens[1]) {
                             systemBanDatabase.add(tokens[1]);
-                            printLog(`Banned user code: ${tokens[1]}`);
+                            printLog(`Banned: ${tokens[1]}`);
                         } else {
-                            printLog("Error: Provide target hardware id string.");
+                            printLog("Syntax Error. Use: /ban [ID]");
                         }
                         break;
                     case '/unban':
                         if (tokens[1]) {
                             systemBanDatabase.delete(tokens[1]);
-                            printLog(`Restored hardware authorization: ${tokens[1]}`);
+                            printLog(`Restored: ${tokens[1]}`);
                         }
                         break;
-                    case '/launch':
-                        if (tokens[1]) {
-                            document.getElementById('targetUrl').value = tokens[1];
-                            loadRequestedUrl();
-                        }
+                    case '/youtube':
+                        launchYouTube();
                         break;
                     default:
-                        printLog(`Invalid operator console entry. Use /launch [url], /ban [id], /unban [id], or /clear.`);
+                        printLog(`Command invalid. Available terminal tools: /youtube, /ban [id], /unban [id], /clear`);
                 }
                 element.value = '';
                 refreshUserPanel();
             }
         }
 
-        // Trigger startup launch load 
         window.onload = function() {
             refreshUserPanel();
-            loadRequestedUrl();
+            launchYouTube(); // Direct launch safe view stream on initialization
         };
     </script>
 </body>
