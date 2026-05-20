@@ -3,509 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Management Network</title>
+    <title>Enterprise Security Gateway Dashboard</title>
     <style>
-        :root {
-            --bg-color: #0b0f19;
-            --panel-color: #111827;
-            --accent-color: #6366f1;
-            --text-color: #f3f4f6;
-            --danger-color: #ef4444;
-            --success-color: #10b981;
-            --game-color: #f59e0b;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: #0f0f0f;
+            color: white;
             display: flex;
+            flex-direction: column;
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
         }
 
-        /* Sidebar Layout */
-        #sidebar {
-            width: 320px;
-            background-color: var(--panel-color);
-            border-right: 1px solid #1f2937;
+        /* Top Workspace Layout Wrapper */
+        .workspace-wrapper {
+            display: flex;
+            flex-grow: 1;
+            width: 100%;
+            height: calc(100% - 180px); /* Leaves exact space for the bottom console panel */
+        }
+
+        /* Sidebar Navigation Layout */
+        .sidebar {
+            width: 260px;
+            background: #16161a;
+            border-right: 1px solid #2d2d35;
             display: flex;
             flex-direction: column;
-            padding: 15px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        .panel-box {
-            background: #1f2937;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #374151;
-        }
-
-        h3 {
-            margin-top: 0;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #9ca3af;
-        }
-
-        /* Toggle Switch Styling */
-        .switch-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 22px;
-        }
-
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #4b5563; transition: .2s; border-radius: 22px;
-        }
-
-        .slider:before {
-            position: absolute; content: ""; height: 14px; width: 14px; left: 4px; bottom: 4px;
-            background-color: white; transition: .2s; border-radius: 50%;
-        }
-
-        input:checked + .slider { background-color: var(--success-color); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 8px 12px;
-            background: #111827;
-            border: 1px solid #4b5563;
-            color: #fff;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-bottom: 8px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-
-        button {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            color: white;
-            transition: background 0.2s, transform 0.1s;
-        }
-        button:active { transform: scale(0.98); }
-
-        .btn-blue { background-color: var(--accent-color); }
-        .btn-red { background-color: var(--danger-color); }
-        .btn-green { background-color: var(--success-color); }
-        .btn-orange { background-color: var(--game-color); }
-        button:hover { filter: brightness(1.15); }
-
-        #cmd-terminal {
-            background: #000;
-            font-family: monospace;
-            height: 100px;
-            overflow-y: auto;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            color: #34d399;
-            margin-bottom: 6px;
-            border: 1px solid #111827;
-        }
-
-        /* Main Viewport Panels */
-        #viewport {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background: #2d3748;
-            position: relative;
-        }
-
-        #address-bar {
-            background: var(--panel-color);
-            padding: 10px;
-            display: flex;
-            gap: 10px;
-            border-bottom: 1px solid #1f2937;
-        }
-
-        #app-frame {
-            flex-grow: 1;
-            border: none;
-            background: #111827;
-        }
-
-        #local-app-container {
-            flex-grow: 1;
             padding: 20px;
-            overflow-y: auto;
-            display: none;
-            background: #1e293b;
-            color: white;
+            gap: 10px;
+            flex-shrink: 0;
+            height: 100%;
         }
 
-        .user-list-item {
+        .sidebar h2 {
+            font-size: 1.1rem;
+            color: #00aaff;
+            text-align: center;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .nav-btn {
+            padding: 12px;
+            background: #222227;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            text-align: left;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .nav-btn:hover {
+            background: #2d2d35;
+        }
+
+        .nav-btn.active {
+            background: rgba(0, 170, 255, 0.15);
+            color: #00aaff;
+            border-left: 4px solid #00aaff;
+        }
+
+        /* Content Area Container */
+        .content {
+            flex-grow: 1;
+            height: 100%;
+            background: #121214;
+            position: relative;
+        }
+
+        /* Clean Embedded Frame Canvas */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* FULLSCREEN BOTTOM TERMINAL LAYER */
+        .admin-terminal-section {
+            width: 100%;
+            height: 180px; /* Locked bottom heights panel */
+            background: #131316;
+            border-top: 1px solid #2d2d35;
+            padding: 12px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .terminal-header {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
-            padding: 6px 0;
-            border-bottom: 1px solid #374151;
             align-items: center;
+            font-size: 11px;
+            font-family: monospace;
+            color: #8a8a93;
         }
 
-        /* Permission Classes */
-        .admin-section { display: none; }
-        .owner-section { display: none; }
+        .terminal-meta {
+            font-weight: 600;
+        }
+
+        .terminal-screen {
+            flex-grow: 1;
+            background-color: #09090b;
+            color: #00aaff;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-y: auto;
+            border: 1px solid #222;
+        }
+
+        .terminal-input-wrapper {
+            display: flex;
+            align-items: center;
+            background-color: #1c1c21;
+            border-radius: 6px;
+            padding: 2px 12px;
+            border: 1px solid #2d2d35;
+        }
+
+        .terminal-prompt {
+            font-family: monospace;
+            font-size: 13px;
+            color: #8a8a93;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .terminal-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            padding: 8px 0;
+            font-family: monospace;
+            font-size: 13px;
+            outline: none;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-    <div id="sidebar">
-        <h2 style="margin-top:0; font-size: 18px; letter-spacing: 0.5px;">Workspace Console</h2>
-        
-        <div class="panel-box" id="loginBox">
-            <h3>System Verification</h3>
-            <input type="password" id="adminKeyInput" placeholder="Enter Key (Ow1 or Ad1)...">
-            <button class="btn-green" onclick="verifyAccess()">Verify Identity</button>
-        </div>
+    <div class="workspace-wrapper">
+        <aside class="sidebar">
+            <h2>NAVIGATION PANEL</h2>
+            <button id="btn-yt" class="nav-btn active" onclick="loadFrame('https://www.youtube.com/', 'btn-yt')">YouTube</button>
+            <button id="btn-tt" class="nav-btn" onclick="loadFrame('https://www.tiktok.com/', 'btn-tt')">TikTok Hub</button>
+            <button id="btn-school" class="nav-btn" onclick="loadFrame('https://wikipedia.org', 'btn-school')">School Content Gateway</button>
+            <button class="nav-btn" style="margin-top: auto; background: #222227; color: #aaa;" onclick="location.reload()">Refresh App</button>
+        </aside>
 
-        <div class="panel-box">
-            <div class="switch-wrapper">
-                <span><strong>Bypass VPN Tunnel</strong></span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="vpnMode" checked onchange="updateProxyMode()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <p id="proxyStatus" style="font-size: 11px; color: var(--success-color); margin: 6px 0 0 0;">Status: VPN Routing Active</p>
-        </div>
-
-        <div class="panel-box">
-            <h3>App Quick Launch</h3>
-            <div class="btn-group">
-                <button class="btn-blue" style="background: #ef4444;" onclick="launchYouTubeEmbed()">YouTube Fix</button>
-                <button class="btn-blue" onclick="fastLaunch('https://www.google.com')">Google</button>
-            </div>
-        </div>
-
-        <div class="panel-box">
-            <h3>Arcade Deck (Local Engine)</h3>
-            <div class="btn-group">
-                <button class="btn-orange" onclick="launchLocalApp('snake')">Retro Snake</button>
-                <button class="btn-orange" onclick="launchLocalApp('clicker')">Cookie Clicker</button>
-            </div>
-            <div class="btn-group" style="margin-bottom: 0;">
-                <button class="btn-orange" style="background:#0d9488;" onclick="launchLocalApp('tictactoe')">Tic-Tac-Toe</button>
-            </div>
-        </div>
-
-        <div class="panel-box">
-            <h3>Live Connected Users</h3>
-            <div style="max-height: 120px; overflow-y: auto; padding-right: 2px;" id="sessionDisplay">
-                </div>
-        </div>
-
-        <div class="panel-box admin-section owner-section">
-            <h3>User Enforcement (Short ID)</h3>
-            <input type="text" id="targetHardwareId" placeholder="Click user or enter short ID...">
-            <div class="btn-group" style="margin-bottom: 0;">
-                <button class="btn-red" onclick="modifyUser('kick')">Kick</button>
-                <button class="btn-red" style="background:#991b1b;" onclick="modifyUser('ban')">Ban</button>
-                <button class="btn-green" onclick="modifyUser('unban')">Unban</button>
-            </div>
-        </div>
-
-        <div class="panel-box owner-section" style="flex-grow: 1; display: flex; flex-direction: column; margin-bottom: 0;">
-            <h3>Owner Console (CMD)</h3>
-            <div id="cmd-terminal">Terminal secure. Owner privileges logged.</div>
-            <input type="text" id="terminalInput" placeholder="Enter owner command..." onkeydown="processCommand(event)">
-        </div>
+        <main class="content" id="viewportCanvas">
+            <iframe id="main-frame" src="about:blank" allow="autoplay; encrypted-media; fullscreen;"></iframe>
+        </main>
     </div>
 
-    <div id="viewport">
-        <div id="address-bar">
-            <input type="text" id="targetUrl" value="https://www.youtube.com" style="margin: 0; flex-grow: 1;">
-            <button class="btn-blue" style="width: auto; padding: 0 22px;" onclick="loadRequestedUrl()">Launch URL</button>
+    <div class="admin-terminal-section">
+        <div class="terminal-header">
+            <div>Terminal Session Link Channel</div>
+            <div class="terminal-meta">
+                Player Name: <span id="lblPlayer" style="color: #00ff77; margin-right: 15px;">...</span> 
+                Identity: <span id="lblUser" style="color: #00aaff; margin-right: 15px;">...</span> | 
+                Permission: <span id="lblRole" style="color: #aaa;">Guest</span>
+            </div>
         </div>
-        
-        <iframe id="app-frame" src=""></iframe>
-        <div id="local-app-container"></div>
+        <div id="terminalLog" class="terminal-screen"></div>
+        <div class="terminal-input-wrapper">
+            <span class="terminal-prompt">admin$</span>
+            <input type="text" id="cmdInput" class="terminal-input" placeholder="Type administrative commands here (e.g., online, role Owner, name Neo)..." onkeypress="execCommand(event)">
+        </div>
     </div>
 
     <script>
-        let systemBanDatabase = new Set();
-        let userRole = "Guest"; // Can be Guest, Admin, or Owner
-        let currentUserId = "3"; // Your ID default string
+        let userRole = "Guest";
+        let username = "";
+        let playerName = "";
 
-        // Simplified short user connection pool arrays
-        let liveConnectedUsers = [
-            { id: "1", role: "User", status: "Online" },
-            { id: "2", role: "User", status: "Online" }
-        ];
+        // Instantiates local simulation storage variables
+        function initializeSystem() {
+            // Setup persistent User ID
+            if (localStorage.getItem('portal_user')) {
+                username = localStorage.getItem('portal_user');
+            } else {
+                username = "User_" + Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem('portal_user', username);
+            }
+            document.getElementById('lblUser').innerText = username;
 
-        // Process Identity Checks and update live list displays
-        function verifyAccess() {
-            const key = document.getElementById('adminKeyInput').value.trim();
-            const loginBox = document.getElementById('loginBox');
-            const adminBoxes = document.querySelectorAll('.admin-section');
-            const ownerBoxes = document.querySelectorAll('.owner-section');
+            // Setup persistent Player Name
+            if (localStorage.getItem('player_name')) {
+                playerName = localStorage.getItem('player_name');
+            } else {
+                playerName = "Player_" + Math.floor(100 + Math.random() * 900);
+                localStorage.setItem('player_name', playerName);
+            }
+            document.getElementById('lblPlayer').innerText = playerName;
 
-            if (key === 'Ow1') {
-                userRole = "Owner";
-                currentUserId = "Owner";
-                loginBox.innerHTML = `<p style="color: #38bdf8; font-weight: bold; margin: 0; font-size:13px;">⚡ Identity Verified: System Owner</p>`;
-                
-                // Show everything
-                adminBoxes.forEach(el => el.style.display = "block");
-                ownerBoxes.forEach(el => {
-                    el.style.display = "flex";
-                    if(!el.classList.contains('owner-section')) el.style.display = "block";
-                });
-                printLog("[SYSTEM] Owner mode activated. All pipelines open.");
-            } 
-            else if (key === 'Ad1') {
-                userRole = "Admin";
-                currentUserId = "Admin";
-                loginBox.innerHTML = `<p style="color: var(--success-color); font-weight: bold; margin: 0; font-size:13px;">✓ Identity Verified: Network Admin</p>`;
-                
-                // Show only user enforcement panels, leave terminal hidden
-                adminBoxes.forEach(el => {
-                    if(!el.classList.contains('owner-section')) el.style.display = "block";
-                });
-            } 
-            else {
-                alert("Authorization token invalid.");
+            // Check persistent Role escalation memory state
+            if (localStorage.getItem('portal_role')) {
+                userRole = localStorage.getItem('portal_role');
+                document.getElementById('lblRole').innerText = userRole;
+                if (userRole === "Owner") {
+                    document.getElementById('lblRole').style.color = "#00ff77";
+                }
+            }
+
+            // Check restriction block vectors
+            if (localStorage.getItem('isBanned') === 'true' || localStorage.getItem('isKicked') === 'true') {
+                applyAccessBlock();
+            } else {
+                logPrint(`Terminal connection gateway open. Security checks cleared for profile handle: [${playerName}]`);
+            }
+        }
+
+        function logPrint(msg) {
+            const screen = document.getElementById('terminalLog');
+            if(screen) {
+                screen.innerHTML += `<div><span style="color:#555;">[${new Date().toLocaleTimeString()}]</span> ${msg}</div>`;
+                screen.scrollTop = screen.scrollHeight;
+            }
+        }
+
+        function loadFrame(url, btnId) {
+            if (localStorage.getItem('isBanned') === 'true' || localStorage.getItem('isKicked') === 'true') {
                 return;
             }
-            refreshUserPanel();
-        }
-
-        function refreshUserPanel() {
-            const display = document.getElementById('sessionDisplay');
-            display.innerHTML = '';
             
-            // Render your profile tracking block with identity markers
-            const isSelfBanned = systemBanDatabase.has(currentUserId);
-            display.innerHTML += `
-                <div class="user-list-item" style="color: #60a5fa; font-weight: bold; cursor: pointer;" onclick="selectUser('${currentUserId}')">
-                    <span>User ${currentUserId} (You)</span>
-                    <span>${isSelfBanned ? '[BANNED]' : '[' + userRole + ']'}</span>
-                </div>`;
+            let targetUrl = url;
+            
+            // AUTOMATED PROXY REDIRECTION: Bypasses network blocks automatically
+            if (url.includes('youtube.com') || url.includes('tiktok.com')) {
+                logPrint(`Proxy Tunnel Triggered: Encapsulating external stream feed securely...`);
+                targetUrl = "https://www.croxyproxy.com/_embed/processing?url=" + encodeURIComponent(url);
+            }
 
-            // Populate other shortened network entities 
-            liveConnectedUsers.forEach(user => {
-                const isBanned = systemBanDatabase.has(user.id);
-                display.innerHTML += `
-                    <div class="user-list-item" style="cursor: pointer;" onclick="selectUser('${user.id}')">
-                        <span>User ${user.id}</span>
-                        <span style="color: ${isBanned ? 'var(--danger-color)' : 'var(--success-color)'}; font-weight: 500;">
-                            ${isBanned ? '[BANNED]' : '[' + user.status + ']'}
-                        </span>
-                    </div>`;
-            });
-        }
+            document.getElementById('main-frame').src = targetUrl;
+            logPrint(`Updating active framework layout container to: ${url}`);
 
-        function selectUser(id) {
-            if (userRole === "Admin" || userRole === "Owner") {
-                document.getElementById('targetHardwareId').value = id;
+            document.querySelectorAll('.sidebar .nav-btn').forEach(btn => btn.classList.remove('active'));
+            if(btnId) {
+                document.getElementById(btnId).classList.add('active');
             }
         }
 
-        // Simulates realistic continuous online list updates
-        setInterval(() => {
-            if (Math.random() > 0.7 && liveConnectedUsers.length < 6) {
-                let nextId = String(liveConnectedUsers.length + 4);
-                liveConnectedUsers.push({ id: nextId, role: "User", status: "Online" });
-                if (userRole === "Owner") printLog(`[NETWORK] Stream channel allocated for User ${nextId}`);
-            }
-            refreshUserPanel();
-        }, 12000);
-
-        // Core Layout Routing Functionality
-        function launchYouTubeEmbed() {
-            hideExternalFrame(false);
-            document.getElementById('app-frame').src = "https://www.youtube.com/embed/jfKfPfyJRdk?list=PLrEnWoR7Gyh6rU6aP6SPrI0Y69KId_0p_";
-            if (userRole === "Owner") printLog("[STREAM] Secure media player frameset initialized.");
+        function applyAccessBlock() {
+            document.getElementById('viewportCanvas').innerHTML = `
+                <div style="text-align:center; padding: 150px 20px; color:#ff4444; background: #0b0b0d; height: 100%;">
+                    <h1 style="font-size: 34px; font-weight:700; margin-bottom: 12px; font-family: sans-serif;">🔴 System Access Revoked</h1>
+                    <p style="color:#777; font-size:14px; font-family: monospace;">Administrative restrictions active on terminal client token signature: <b>${username}</b></p>
+                    <p style="color:#444; font-size:12px; font-family: monospace; margin-top: 10px;">Type /unban ${username} in the terminal line below to reset database state flags.</p>
+                </div>
+            `;
         }
 
-        function hideExternalFrame(shouldHideLocal) {
-            const frame = document.getElementById('app-frame');
-            const localBox = document.getElementById('local-app-container');
-            if(shouldHideLocal) {
-                frame.style.display = "none";
-                localBox.style.display = "block";
-            } else {
-                frame.style.display = "block";
-                localBox.style.display = "none";
-            }
-        }
+        // Administrative Command Terminal Script Logic
+        function execCommand(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('cmdInput');
+                const cmd = input.value.trim();
+                if (!cmd) return;
 
-        function launchLocalApp(appName) {
-            hideExternalFrame(true);
-            const container = document.getElementById('local-app-container');
+                // Output typed line to log viewport screen 
+                logPrint(`<span style="color:#fff;">$ ${cmd}</span>`);
 
-            if(appName === 'snake') {
-                container.innerHTML = `<h2>Retro Snake Game</h2><p>Score: <span id="score">0</span>. Use Arrow Keys.</p><canvas id="snakeGame" width="400" height="400" style="background:#000; border:2px solid #fff; display:block; margin:0 auto;"></canvas>`;
-                initSnakeGame();
-            } else if (appName === 'clicker') {
-                container.innerHTML = `<div style="text-align:center; padding-top:40px;"><h2>Cookie Clicker Alpha</h2><h1 id="count" style="font-size:64px; color:var(--game-color);">0</h1><button onclick="document.getElementById('count').innerText = parseInt(document.getElementById('count').innerText)+1" style="width:200px; height:200px; border-radius:50%; background:var(--accent-color); font-size:24px;">CLICK ME</button></div>`;
-            } else if (appName === 'tictactoe') {
-                container.innerHTML = `<h2>Tic-Tac-Toe App</h2><div style="display:grid; grid-template-columns: repeat(3, 100px); gap:5px; justify-content:center; margin-top:20px;">${Array(9).fill().map((_,i)=> `<button onclick="this.innerText='X'; this.disabled=true;" style="height:100px; background:#334155; font-size:32px;"></button>`).join('')}</div>`;
-            }
-        }
+                const args = cmd.split(' ');
+                const primaryInstruction = args[0];
 
-        function loadRequestedUrl() {
-            hideExternalFrame(false);
-            let destination = document.getElementById('targetUrl').value.trim();
-            if (!destination) return;
-            if (!destination.startsWith('http://') && !destination.startsWith('https://')) {
-                destination = 'https://' + destination;
-            }
-            const proxyActive = document.getElementById('vpnMode').checked;
-            const frame = document.getElementById('app-frame');
-
-            if (proxyActive) {
-                if(userRole === "Owner") printLog(`[STEALTH] Tunneling request parameter payload: ${destination}`);
-                frame.src = "https://womginx.arph.org/main/" + destination;
-            } else {
-                frame.src = destination;
-            }
-        }
-
-        function fastLaunch(siteUrl) {
-            document.getElementById('targetUrl').value = siteUrl;
-            loadRequestedUrl();
-        }
-
-        function updateProxyMode() {
-            const enabled = document.getElementById('vpnMode').checked;
-            const txt = document.getElementById('proxyStatus');
-            if (enabled) {
-                txt.innerText = "Status: VPN Routing Active";
-                txt.style.color = "var(--success-color)";
-                if(userRole === "Owner") printLog("[VPN] Proxy sandbox layers re-initialized.");
-            } else {
-                txt.innerText = "Status: Direct Tunnel Only";
-                txt.style.color = "#9ca3af";
-                if(userRole === "Owner") printLog("[VPN] Proxy pipeline dropped back to raw context.");
-            }
-        }
-
-        // Administrative Kick/Ban Processing
-        function modifyUser(action) {
-            if (userRole === "Guest") return;
-            const target = document.getElementById('targetHardwareId').value.trim();
-            if (!target) { alert("Select an active connection target index."); return; }
-
-            if (action === 'ban') {
-                systemBanDatabase.add(target);
-                if(userRole === "Owner") printLog(`[SECURITY] ID code '${target}' permanently locked out.`);
-            } else if (action === 'kick') {
-                if(userRole === "Owner") printLog(`[SECURITY] Active browser pool connection dropped for ID: ${target}`);
-                liveConnectedUsers = liveConnectedUsers.filter(u => u.id !== target);
-            } else if (action === 'unban') {
-                systemBanDatabase.delete(target);
-                if(userRole === "Owner") printLog(`[SECURITY] Enforcement dropped from ID string: ${target}`);
-            }
-            refreshUserPanel();
-        }
-
-        function printLog(text) {
-            const term = document.getElementById('cmd-terminal');
-            if(term) {
-                term.innerHTML += `<br>> ${text}`;
-                term.scrollTop = term.scrollHeight;
-            }
-        }
-
-        function processCommand(event) {
-            if (event.key === 'Enter' && userRole === "Owner") {
-                const element = document.getElementById('terminalInput');
-                const rawCmd = element.value.trim();
-                if (!rawCmd) return;
-
-                printLog(`<span style="color:#fff;">owner$ ${rawCmd}</span>`);
-                const tokens = rawCmd.split(' ');
-                const command = tokens[0];
-
-                switch(command) {
-                    case '/clear':
-                        document.getElementById('cmd-terminal').innerHTML = "Buffer wiped.";
-                        break;
-                    case '/ban':
-                        if (tokens[1]) {
-                            systemBanDatabase.add(tokens[1]);
-                            printLog(`Banned User ID: ${tokens[1]}`);
-                        }
-                        break;
-                    case '/unban':
-                        if (tokens[1]) {
-                            systemBanDatabase.delete(tokens[1]);
-                            printLog(`Restored User ID: ${tokens[1]}`);
-                        }
-                        break;
-                    default:
-                        printLog(`Command error. Controls: /ban [id], /unban [id], /clear`);
+                // 1. Name assignment logic
+                if (primaryInstruction === "name" && args[1]) {
+                    const newName = cmd.substring(5).trim();
+                    playerName = newName;
+                    localStorage.setItem('player_name', newName);
+                    document.getElementById('lblPlayer').innerText = newName;
+                    logPrint(`Player name profile assignment successfully shifted to: <span style="color:#00ff77;">${newName}</span>`);
+                } 
+                // 2. Role escalation verification
+                else if (cmd === "role Owner") {
+                    userRole = "Owner";
+                    localStorage.setItem('portal_role', 'Owner');
+                    document.getElementById('lblRole').innerText = "Owner";
+                    document.getElementById('lblRole').style.color = "#00ff77";
+                    logPrint("Permissions status authenticated: Master Owner access keys mapped.");
+                } 
+                // 3. System profile status view
+                else if (cmd === "online") {
+                    logPrint("--- Local Sandbox Security Registry Tracking ---");
+                    logPrint(`Active Node: ${playerName} | Security Identifier: ${username} | Clearance: ${userRole}`);
+                } 
+                // 4. Session Kick simulator logic
+                else if (primaryInstruction === "/kick") {
+                    if (userRole !== "Owner") { logPrint("Error code: Operation blocked. Owner privileges required."); input.value = ''; return; }
+                    const target = args[1];
+                    if (target === username || target === playerName) {
+                        logPrint(`Executing immediate session pipeline kill routine for: ${target}`);
+                        localStorage.setItem('isKicked', 'true');
+                        setTimeout(applyAccessBlock, 500);
+                    } else {
+                        logPrint(`Simulation target user "${target}" is not active on this node interface.`);
+                    }
+                } 
+                // 5. Persistent Ban simulation flag logic
+                else if (primaryInstruction === "/ban") {
+                    if (userRole !== "Owner") { logPrint("Error code: Operation blocked. Owner privileges required."); input.value = ''; return; }
+                    const target = args[1];
+                    if (target === username || target === playerName) {
+                        logPrint(`Writing hardware block entry to file storage for user index: ${target}`);
+                        localStorage.setItem('isBanned', 'true');
+                        setTimeout(applyAccessBlock, 500);
+                    } else {
+                        logPrint(`Simulation target user "${target}" is not active on this node interface.`);
+                    }
+                } 
+                // 6. Purge block restriction logic (Can be executed from terminal layout)
+                else if (primaryInstruction === "/unban") {
+                    if (userRole !== "Owner") { logPrint("Error code: Operation blocked. Owner privileges required."); input.value = ''; return; }
+                    const target = args[1];
+                    if (target === username || target === playerName) {
+                        logPrint(`Purging restriction logs from system registry values for: ${target}`);
+                        localStorage.removeItem('isBanned');
+                        localStorage.removeItem('isKicked');
+                        window.location.reload();
+                    } else {
+                        logPrint(`Target file parameter token record mapping matching "${target}" not found.`);
+                    }
+                } else {
+                    logPrint("<span style='color:#ff4444;'>Command not recognized or access matrix verification failed.</span>");
                 }
-                element.value = '';
-                refreshUserPanel();
+                input.value = '';
             }
-        }
-
-        function initSnakeGame() {
-            const canvas = document.getElementById("snakeGame"); if(!canvas) return;
-            const ctx = canvas.getContext("2d"); let box = 20; let snake = [{x: 9 * box, y: 10 * box}];
-            let direction = "RIGHT"; let score = 0;
-            let food = {x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box};
-            document.addEventListener("keydown", e => {
-                if(e.keyCode == 37 && direction != "RIGHT") direction = "LEFT";
-                else if(e.keyCode == 38 && direction != "DOWN") direction = "UP";
-                else if(e.keyCode == 39 && direction != "LEFT") direction = "RIGHT";
-                else if(e.keyCode == 40 && direction != "UP") direction = "DOWN";
-            });
-            let game = setInterval(() => {
-                ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                for(let i=0; i<snake.length; i++) {
-                    ctx.fillStyle = (i == 0)? "var(--accent-color)" : "#fff";
-                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                }
-                ctx.fillStyle = "var(--danger-color)"; ctx.fillRect(food.x, food.y, box, box);
-                let snakeX = snake[0].x; let snakeY = snake[0].y;
-                if(direction == "LEFT") snakeX -= box; if(direction == "UP") snakeY -= box;
-                if(direction == "RIGHT") snakeX += box; if(direction == "DOWN") snakeY += box;
-                if(snakeX == food.x && snakeY == food.y) {
-                    score++; document.getElementById("score").innerText = score;
-                    food = {x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box};
-                } else { snake.pop(); }
-                let newHead = {x: snakeX, y: snakeY};
-                if(snakeX < 0 || snakeX > 19*box || snakeY < 0 || snakeY > 19*box || snake.some(s=>s.x===newHead.x && s.y===newHead.y)) {
-                    clearInterval(game); printLog("[ARCADE] Snake game terminated. Score: " + score);
-                }
-                snake.unshift(newHead);
-            }, 100);
         }
 
         window.onload = function() {
-            refreshUserPanel();
-            launchYouTubeEmbed();
+            initializeSystem();
+            loadFrame('https://www.youtube.com/', 'btn-yt');
         };
     </script>
 </body>
